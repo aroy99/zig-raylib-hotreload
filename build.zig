@@ -33,7 +33,7 @@ pub fn build(b: *std.Build) void {
         const raylib_dep = b.dependency("raylib-zig", .{
             .target = target,
             .optimize = optimize,
-            .shared = true,
+            .shared = if (hotReload) true else false,
         });
 
         const raylib = raylib_dep.module("raylib"); // main raylib module

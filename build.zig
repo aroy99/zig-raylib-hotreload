@@ -15,14 +15,10 @@ pub fn build(b: *std.Build) void {
     // set a preferred release mode, allowing the user to decide how to optimize.
     const optimize = b.standardOptimizeOption(.{});
 
-    const lib = b.addSharedLibrary(.{
-        .name = "game",
-        .root_source_file = b.path("src/core.zig"),
-        .target = target,
-        .optimize = optimize,
-    });
+    const hotReload = b.option(bool, "hotReload", "Build the game as a dll to allow for automatic hot-reload of code") orelse true;
 
-    b.installArtifact(lib);
+    var options = b.addOptions();
+    options.addOption(bool, "hotReload", hotReload);
 
     const exe = b.addExecutable(.{
         .name = "game",
@@ -30,11 +26,7 @@ pub fn build(b: *std.Build) void {
         .target = target,
         .optimize = optimize,
     });
-
-    // This declares intent for the executable to be installed into the
-    // standard location when the user invokes the "install" step (the default
-    // step when running `zig build`).
-    b.installArtifact(exe);
+    exe.root_module.addOptions("config", options);
 
     // Raylib
     {
@@ -52,18 +44,25 @@ pub fn build(b: *std.Build) void {
         exe.root_module.addImport("raylib", raylib);
         exe.root_module.addImport("raygui", raygui);
 
-        lib.linkLibrary(raylib_artifact);
-        lib.root_module.addImport("raylib", raylib);
-        lib.root_module.addImport("raygui", raygui);
+        if (hotReload) {
+            const lib = b.addSharedLibrary(.{
+                .name = "game",
+                .root_source_file = b.path("src/core.zig"),
+                .target = target,
+                .optimize = optimize,
+            });
 
-        // const raylib_lib = b.addSharedLibrary(.{
-        //     .name = "raylib",
-        //     .root_source_file = b.path("raylib-zig"),
-        //     .target = target,
-        //     .optimize = optimize,
-        // });
-        // b.installArtifact(raylib_lib);
+            b.installArtifact(lib);
+            lib.linkLibrary(raylib_artifact);
+            lib.root_module.addImport("raylib", raylib);
+            lib.root_module.addImport("raygui", raygui);
+        }
     }
+
+    // This declares intent for the executable to be installed into the
+    // standard location when the user invokes the "install" step (the default
+    // step when running `zig build`).
+    b.installArtifact(exe);
 
     // This *creates* a Run step in the build graph, to be executed when another
     // step is evaluated that depends on it. The next line below will establish

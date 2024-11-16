@@ -2,7 +2,7 @@
 A simple project template for hot reloading code with Raylib
 
 # build instructions
-`zig build run` should automatically run the hot-reloaded version of the program.
+`zig build run` (currently I'm on zig 14 dev) should automatically run the hot-reloaded version of the program.
 
 You may need to manually create the /libs if it doesn't already exist.
 

@@ -18,14 +18,13 @@ const LIB_NAME = if (builtIn.target.os.tag == .windows) "game.dll" else "libgame
 const CopyFile = struct { src: []const u8, dst: []const u8 };
 const FILES_TO_COPY = if (builtIn.target.os.tag == .windows)
     [_]CopyFile{
-        .{ .src = EXE_SRC_DIR ++ "/game.pdb", .dst = LIB_DEST_DIR ++ "/game.pdb" },
+        .{ .src = EXE_SRC_DIR ++ "game.pdb", .dst = LIB_DEST_DIR ++ "game.pdb" },
         .{ .src = EXE_SRC_DIR ++ LIB_NAME, .dst = LIB_DEST_DIR ++ LIB_NAME },
-        .{ .src = LIB_SRC_DIR ++ "/game.lib", .dst = LIB_DEST_DIR ++ "/game.lib" },
+        .{ .src = LIB_SRC_DIR ++ "game.lib", .dst = LIB_DEST_DIR ++ "game.lib" },
     }
 else
     [_]CopyFile{
         .{ .src = LIB_SRC_DIR ++ LIB_NAME, .dst = LIB_DEST_DIR ++ LIB_NAME },
-        .{ .src = LIB_SRC_DIR ++ "/game.lib", .dst = LIB_DEST_DIR ++ "/game.lib" },
     };
 
 pub fn tryToReload(updateAndRender: *updateAndRender_t) void {

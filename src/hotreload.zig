@@ -7,31 +7,31 @@ pub fn updateAndRenderStub(_: *s.GameState) callconv(.C) void {}
 
 var curr_lib: std.DynLib = undefined;
 
-var shouldReload: u16 = 0;
-const RELOADTIME = 144;
+var oldModificationTime: i128 = 0;
 
 const LIB_SRC_DIR = "zig-out/lib/";
 const EXE_SRC_DIR = "zig-out/bin/";
 const LIB_DEST_DIR = "libs/";
 const LIB_NAME = if (builtIn.target.os.tag == .windows) "game.dll" else "libgame.so";
+const LIB_SRC = if (builtIn.target.os.tag == .windows) EXE_SRC_DIR ++ LIB_NAME else LIB_SRC_DIR ++ LIB_NAME;
 
 const CopyFile = struct { src: []const u8, dst: []const u8 };
 const FILES_TO_COPY = if (builtIn.target.os.tag == .windows)
     [_]CopyFile{
         .{ .src = EXE_SRC_DIR ++ "game.pdb", .dst = LIB_DEST_DIR ++ "game.pdb" },
-        .{ .src = EXE_SRC_DIR ++ LIB_NAME, .dst = LIB_DEST_DIR ++ LIB_NAME },
+        .{ .src = LIB_SRC, .dst = LIB_DEST_DIR ++ LIB_NAME },
         .{ .src = LIB_SRC_DIR ++ "game.lib", .dst = LIB_DEST_DIR ++ "game.lib" },
     }
 else
     [_]CopyFile{
-        .{ .src = LIB_SRC_DIR ++ LIB_NAME, .dst = LIB_DEST_DIR ++ LIB_NAME },
+        .{ .src = LIB_SRC, .dst = LIB_DEST_DIR ++ LIB_NAME },
     };
 
 pub fn tryToReload(updateAndRender: *updateAndRender_t) void {
-    shouldReload += 1;
-    if (shouldReload > RELOADTIME) {
+    const stat = std.fs.Dir.statFile(std.fs.cwd(), LIB_SRC) catch return;
+    if (stat.mtime > oldModificationTime) {
         reloadCode(true, updateAndRender) catch unreachable;
-        shouldReload = 0;
+        oldModificationTime = stat.mtime;
     }
 }
 

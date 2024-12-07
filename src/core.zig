@@ -41,7 +41,7 @@ pub export fn updateAndRender(gs: *s.GameState) void {
         r.drawRectangleLines(15 + @as(i32, @intFromFloat(gs.frameRec.x)), 40 + @as(i32, @intFromFloat(gs.frameRec.y)), @as(i32, @intFromFloat(gs.frameRec.width)), @as(i32, @intFromFloat(gs.frameRec.height)), r.Color.red);
 
         r.drawText("Frame Speed: ", 165, 210, 10, r.Color.dark_gray);
-        //r.drawText(r.textFormat("%02i FPS", .{gs.framesSpeed}), 575, 210, 10, r.Color.dark_gray);
+        r.drawText(r.textFormat("%02i FPS", .{gs.framesSpeed}), 575, 210, 10, r.Color.dark_gray);
         r.drawText("Hot reloading now works!", 290, 240, 10, r.Color.dark_gray);
 
         var i: i32 = 0;

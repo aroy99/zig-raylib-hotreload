@@ -48,3 +48,12 @@ pub fn reloadCode(closeDll: bool, updateAndRender: *updateAndRender_t) !void {
 
     updateAndRender.* = curr_lib.lookup(updateAndRender_t, "updateAndRender").?;
 }
+
+pub fn createLibraryDir() !void {
+    var file = std.fs.cwd().openDir(LIB_DEST_DIR, .{});
+    if (file) |*f| {
+        f.close();
+    } else |_| {
+        try std.fs.Dir.makeDir(std.fs.cwd(), LIB_DEST_DIR);
+    }
+}

@@ -10,6 +10,7 @@ pub fn main() !void {
     const screenHeight = 450;
 
     if (hotReload) {
+        try rd.createLibraryDir();
         try rd.reloadCode(false, &updateAndRender);
     }
 

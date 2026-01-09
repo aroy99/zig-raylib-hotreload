@@ -3,7 +3,7 @@ const std = @import("std");
 const builtIn = @import("builtin");
 
 const updateAndRender_t = @TypeOf(&updateAndRenderStub);
-pub fn updateAndRenderStub(_: *s.GameState) callconv(.C) void {}
+pub fn updateAndRenderStub(_: *s.GameState) callconv(.c) void {}
 
 var curr_lib: std.DynLib = undefined;
 
@@ -39,7 +39,10 @@ pub fn reloadCode(closeDll: bool, updateAndRender: *updateAndRender_t) !void {
     if (closeDll) curr_lib.close();
 
     for (FILES_TO_COPY) |paths| {
-        try std.fs.Dir.copyFile(std.fs.cwd(), paths.src, std.fs.cwd(), paths.dst, .{});
+        std.fs.Dir.copyFile(std.fs.cwd(), paths.src, std.fs.cwd(), paths.dst, .{}) catch |err| {
+            std.debug.print("****Could not copy {s} to {s}\n", .{ paths.src, paths.dst });
+            return err;
+        };
     }
     const out_path = LIB_DEST_DIR ++ LIB_NAME;
 

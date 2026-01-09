@@ -2,7 +2,7 @@ const s = @import("shared.zig");
 const hotReload = @import("config").hotReload;
 const rd = if (hotReload) @import("hotreload.zig") else undefined;
 
-var updateAndRender: *const fn (*s.GameState) callconv(.C) void =
+var updateAndRender: *const fn (*s.GameState) callconv(.c) void =
     if (hotReload) rd.updateAndRenderStub else @import("core.zig").updateAndRender;
 
 pub fn main() !void {

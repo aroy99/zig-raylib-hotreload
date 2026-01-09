@@ -22,18 +22,23 @@ pub fn build(b: *std.Build) void {
 
     const exe = b.addExecutable(.{
         .name = "game",
-        .root_source_file = b.path("src/main.zig"),
-        .target = target,
-        .optimize = optimize,
+        .root_module = b.addModule(
+            "game",
+            .{
+                .root_source_file = b.path("src/main.zig"),
+                .target = target,
+                .optimize = optimize,
+            },
+        ),
     });
     exe.root_module.addOptions("config", options);
 
     // Raylib
     {
-        const raylib_dep = b.dependency("raylib-zig", .{
+        const raylib_dep = b.dependency("raylib_zig", .{
             .target = target,
             .optimize = optimize,
-            .shared = if (hotReload) true else false,
+            .linkage = .dynamic,
         });
 
         const raylib = raylib_dep.module("raylib"); // main raylib module
@@ -45,11 +50,17 @@ pub fn build(b: *std.Build) void {
         exe.root_module.addImport("raygui", raygui);
 
         if (hotReload) {
-            const lib = b.addSharedLibrary(.{
+            const lib = b.addLibrary(.{
                 .name = "game",
-                .root_source_file = b.path("src/core.zig"),
-                .target = target,
-                .optimize = optimize,
+                .linkage = .dynamic,
+                .root_module = b.addModule(
+                    "core",
+                    .{
+                        .root_source_file = b.path("src/core.zig"),
+                        .target = target,
+                        .optimize = optimize,
+                    },
+                ),
             });
 
             b.installArtifact(lib);

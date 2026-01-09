@@ -19,9 +19,9 @@ pub export fn updateAndRender(gs: *s.GameState) void {
     }
 
     // Control frames speed
-    if (r.isKeyPressed(r.KeyboardKey.key_right)) {
+    if (r.isKeyPressed(r.KeyboardKey.right)) {
         gs.framesSpeed += 1;
-    } else if (r.isKeyPressed(r.KeyboardKey.key_left)) {
+    } else if (r.isKeyPressed(r.KeyboardKey.left)) {
         gs.framesSpeed -= 1;
     }
 

@@ -7,7 +7,7 @@ pub fn updateAndRenderStub(_: *s.GameState) callconv(.c) void {}
 
 var curr_lib: std.DynLib = undefined;
 
-var oldModificationTime: i128 = 0;
+var oldModificationTime: i96 = 0;
 
 const LIB_SRC_DIR = "zig-out/lib/";
 const EXE_SRC_DIR = "zig-out/bin/";
@@ -27,19 +27,21 @@ else
         .{ .src = LIB_SRC, .dst = LIB_DEST_DIR ++ LIB_NAME },
     };
 
-pub fn tryToReload(updateAndRender: *updateAndRender_t) void {
-    const stat = std.fs.Dir.statFile(std.fs.cwd(), LIB_SRC) catch return;
-    if (stat.mtime > oldModificationTime) {
-        reloadCode(true, updateAndRender) catch unreachable;
-        oldModificationTime = stat.mtime;
+pub fn tryToReload(io: std.Io, updateAndRender: *updateAndRender_t) void {
+    const stat = std.Io.Dir.statFile(std.Io.Dir.cwd(), io, LIB_SRC, .{}) catch return;
+    if (stat.mtime.nanoseconds > oldModificationTime) {
+        reloadCode(io, true, updateAndRender) catch unreachable;
+        oldModificationTime = stat.mtime.nanoseconds;
     }
 }
 
-pub fn reloadCode(closeDll: bool, updateAndRender: *updateAndRender_t) !void {
+pub fn reloadCode(io: std.Io, closeDll: bool, updateAndRender: *updateAndRender_t) !void {
     if (closeDll) curr_lib.close();
 
+    const cwd = std.Io.Dir.cwd();
+
     for (FILES_TO_COPY) |paths| {
-        std.fs.Dir.copyFile(std.fs.cwd(), paths.src, std.fs.cwd(), paths.dst, .{}) catch |err| {
+        std.Io.Dir.copyFile(cwd, paths.src, cwd, paths.dst, io, .{}) catch |err| {
             std.debug.print("****Could not copy {s} to {s}\n", .{ paths.src, paths.dst });
             return err;
         };
@@ -52,11 +54,13 @@ pub fn reloadCode(closeDll: bool, updateAndRender: *updateAndRender_t) !void {
     updateAndRender.* = curr_lib.lookup(updateAndRender_t, "updateAndRender").?;
 }
 
-pub fn createLibraryDir() !void {
-    var file = std.fs.cwd().openDir(LIB_DEST_DIR, .{});
+pub fn createLibraryDir(io: std.Io) !void {
+    const cwd = std.Io.Dir.cwd();
+    var file = cwd.openDir(io, LIB_DEST_DIR, .{});
+
     if (file) |*f| {
-        f.close();
+        f.close(io);
     } else |_| {
-        try std.fs.Dir.makeDir(std.fs.cwd(), LIB_DEST_DIR);
+        try cwd.createDir(io, LIB_DEST_DIR, .default_file);
     }
 }

@@ -30,6 +30,7 @@ pub fn build(b: *std.Build) void {
                 .optimize = optimize,
             },
         ),
+        .use_llvm = true,
     });
     exe.root_module.addOptions("config", options);
 
@@ -45,7 +46,7 @@ pub fn build(b: *std.Build) void {
         const raygui = raylib_dep.module("raygui"); // raygui module
         const raylib_artifact = raylib_dep.artifact("raylib"); // raylib C library
 
-        exe.linkLibrary(raylib_artifact);
+        exe.root_module.linkLibrary(raylib_artifact);
         exe.root_module.addImport("raylib", raylib);
         exe.root_module.addImport("raygui", raygui);
 
@@ -64,7 +65,7 @@ pub fn build(b: *std.Build) void {
             });
 
             b.installArtifact(lib);
-            lib.linkLibrary(raylib_artifact);
+            lib.root_module.linkLibrary(raylib_artifact);
             lib.root_module.addImport("raylib", raylib);
             lib.root_module.addImport("raygui", raygui);
         }
